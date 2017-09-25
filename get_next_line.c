@@ -5,96 +5,78 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: wkhosa <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/09/13 13:07:23 by wkhosa            #+#    #+#             */
-/*   Updated: 2017/09/18 18:05:59 by wkhosa           ###   ########.fr       */
+/*   Created: 2017/09/25 10:46:52 by wkhosa            #+#    #+#             */
+/*   Updated: 2017/09/25 17:47:05 by wkhosa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-/*
-int		get_next_line(int const fd, char **line)
+
+int		read_from_buff(int const fd, char **store)
 {
-//	return (-1);
+	int		byte_read;
+	char	buff[BUFF_SIZE + 1];
+	char	*temp;
 
-	if (buff is not initialised)
-		initialise buff
-
-	initialise temp
-
-	nbyte = read(fd, temp, BUFF_SIZE);
+	if ((byte_read = read(fd, buff, BUFF_SIZE)) >= 0)
 	{
-		ft_strcat(buff, temp);
-		nbyte < BUFF_SIZE;
-		{
-			take data from buff up to endl or newl to line
-				if (newl comes before endl)
-					shift data in buff
-					return (1)
-				else
-					free buff
-			return (0)
-		}
-		nbyte == BUFF_SIZE;
-		{
-			take data from buff up to newl or endl to line
-				if (newl comes before endl)
-					shift data in buff
-					return (1);
-				else
-					free buff
-					gnl
-				return (1)
-		}
-		nbyte == 0;
-		{
-			take data from buff to line
-			free buff
-			return (0)
-		}
-	}
-	return (0)
-}
-*/
-
-#include <stdio.h>
-
-int		get_next_line(int const fd, char **line)
-{
-	static	char	*buff = NULL;
-	char			*temp;
-	int				nbyte;
-
-	if (!(buff))
-	{
-		if (!(buff = ft_strnew(2 * BUFF_SIZE))) 
+		buff[byte_read] = '\0';
+		if (byte_read == 0)
+			return (0);
+		if (!(temp = ft_strjoin(*store, buff)))
 			return (-1);
-	//	printf(">>> buff initialising buff = %s\n", buff);
+		free(*store);
+		*store = temp;
+		return (byte_read);
 	}
-	if (!(temp = ft_strnew(BUFF_SIZE)) || fd < 0)
-		return (-1);
-	ft_strclr(*line);
-	while ((nbyte = read(fd, temp, BUFF_SIZE)) > 0)
+	return (-1);
+}
+
+int		from_store_to_line(char **line, char **store, int const ret)
+{
+	char	*temp;
+	size_t	len;
+
+	temp = ft_strchr(*store, '\n');
+	if (ret == BUFF_SIZE)
+		if (temp == NULL)
+			return (0);
+	if (temp == NULL)
 	{
-		temp[nbyte] = '\0';
-	//	printf("#1>>> nbyte = %d, temp = %s '\n", nbyte, temp);
-		if (ft_strchr(ft_strcat(buff , temp), '\n'))
-		{
-	//		printf("#2>>> buff = %s, temp = %s '\n", buff, temp);
-			ft_strdel(&temp);
-		//	ft_strclr(*line);
-			temp = ft_strsub(buff, 0, ft_strchr(buff, '\n') - buff + 1);
-	//		printf("#3>>> buff = %s, temp = %s '\n", buff, temp);
-			ft_memmove(buff, ft_strchr(buff, '\n') + 1, ft_strlen(ft_strchr(buff, '\n')) + 1);
-	//		printf("#4>>> line = %s  buff = %s, temp = %s '\n", *line, buff, temp);
-			ft_strncat(*line, temp, ft_strchr(temp, '\n') - temp);
-	//		printf("#5>>> line = %s  buff = %s, temp = %s '\n", *line, buff, temp);
-			return (1);
-		}
-	//		printf("#6>>> line = %s  buff = %s, temp = %s '\n", *line, buff, temp);
-		ft_strcat(*line, buff);
-		ft_strclr(buff);
-	//		printf("#7>>> line = %s  buff = %s, temp = %s '\n", *line, buff, temp);
+		*line = ft_strsub(*store, 0, ft_strlen(*store));
+		ft_strclr(*store);
+		return (1);
 	}
-	//		printf("#8>>> line = %s  buff = %s, temp = %s '\n", *line, buff, temp);
-	return (0);
+	else
+	{
+		len = temp - *store;
+		*line = ft_strsub(*store, 0, len);
+		ft_memmove(*store, temp + 1, ft_strlen(temp));
+	}
+	return (1);
+}
+
+int		get_next_line(int const fd, char **line)
+{
+	static	char	*store = NULL;
+	int				ret_read_buff;
+	int				ret_read_line;
+
+	if (store == NULL)
+		if (!(store = ft_strnew(BUFF_SIZE)))
+			return (-1);
+	if (fd < 0)
+		return (-1);
+	if ((ret_read_buff = read_from_buff(fd, &store)) >= 0)
+	{
+		if (ret_read_buff == 0)
+			if (ft_strlen(store) == 0)
+				return (0);
+		ret_read_line = from_store_to_line(line, &store, ret_read_buff);
+		if (ret_read_line == 0)
+			get_next_line(fd, line);
+		else
+			return (1);
+	}
+	return (-1);
 }
