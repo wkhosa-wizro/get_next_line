@@ -6,7 +6,7 @@
 /*   By: wkhosa <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/25 10:46:52 by wkhosa            #+#    #+#             */
-/*   Updated: 2017/09/25 17:47:05 by wkhosa           ###   ########.fr       */
+/*   Updated: 2017/09/30 15:57:09 by wkhosa           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,6 @@ int		read_from_buff(int const fd, char **store)
 	if ((byte_read = read(fd, buff, BUFF_SIZE)) >= 0)
 	{
 		buff[byte_read] = '\0';
-		if (byte_read == 0)
-			return (0);
 		if (!(temp = ft_strjoin(*store, buff)))
 			return (-1);
 		free(*store);
@@ -45,7 +43,6 @@ int		from_store_to_line(char **line, char **store, int const ret)
 	{
 		*line = ft_strsub(*store, 0, ft_strlen(*store));
 		ft_strclr(*store);
-		return (1);
 	}
 	else
 	{
@@ -75,8 +72,8 @@ int		get_next_line(int const fd, char **line)
 		ret_read_line = from_store_to_line(line, &store, ret_read_buff);
 		if (ret_read_line == 0)
 			get_next_line(fd, line);
-		else
-			return (1);
 	}
-	return (-1);
+	else
+		return (-1);
+	return (1);
 }
