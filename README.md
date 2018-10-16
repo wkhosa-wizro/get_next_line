@@ -1,2 +1,7 @@
 # get_next_line 
- check the project pdf
+ Read get_next_line.en.pdf for project description
+
+# Building The Project
+* clone get_next_line project
+* **cd** into the get_next_line directory
+* *clone libft project - get next line depends on it* 
