@@ -19,9 +19,9 @@ int		main(int argc, char **argv)
 	int		index;
 	int		fd;
 
-	if (!(line = ft_strnew(1)) || !(line = ft_strnew(100)))
+	if (!(line = ft_strnew(100)))
 	{
-		ft_putendl("failed to allocate memory in main line 23");
+		ft_putendl("failed to allocate memory in main line");
 		return (0);
 	}
 	if (argc > 1)
@@ -34,10 +34,8 @@ int		main(int argc, char **argv)
 				ft_putstr("Failed to open file --");
 				ft_putstr(argv[index]);
 				ft_putendl("-- please check if it exist");
-				return (0);
 			}
-			get_next_line(fd, &line);
-		//	while (get_next_line(fd, &line))
+			while (get_next_line(fd, &line) && fd != -1)
 				ft_putendl(line);
 			index++;
 		}
